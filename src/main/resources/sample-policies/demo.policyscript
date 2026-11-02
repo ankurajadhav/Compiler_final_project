@@ -1,0 +1,19 @@
+ALLOW student TO access computer_lab
+WHEN time BETWEEN 09:00 AND 17:00
+PRIORITY 10;
+
+DENY student TO access computer_lab
+WHEN time BETWEEN 12:00 AND 14:00
+PRIORITY 1;
+
+ALLOW faculty TO access computer_lab
+WHEN day = Monday OR day = Friday
+PRIORITY 5;
+
+ALLOW faculty TO access server_room PRIORITY 10;
+
+DENY guest TO access server_room PRIORITY 10;
+
+ALLOW student TO access computer_lab
+WHEN day = Monday AND time BETWEEN 09:00 AND 17:00
+PRIORITY 11;

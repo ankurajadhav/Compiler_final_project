@@ -1,0 +1,58 @@
+POLICYSCRIPT V18 VERIFICATION RECORD
+====================================
+
+Environment used for this record
+--------------------------------
+- OpenJDK 21 compiler/runtime available.
+- Maven executable not installed in the authoring environment.
+- No cached Maven/JavaFX/JUnit dependencies were available.
+- Therefore the official Maven/JUnit lifecycle and JavaFX desktop launch were NOT run here.
+
+Dependency-free regression command
+-----------------------------------
+bash tools/run-core-verification.sh
+
+Observed result after fresh clean verification output directory
+---------------------------------------------------------------
+- Original compiler verification: 93 passed, 0 failed.
+- Academic management/policy verification: 92 passed, 0 failed.
+- Academic cross-scope priority matrix: 33 passed, 0 failed.
+- Priority conflict diagnostics: 17 passed, 0 failed.
+- Choice selector verification: 5 passed, 0 failed.
+- UI integration structure verification: 29 passed, 0 failed.
+- Workspace management verification: 9 passed, 0 failed.
+- Deletion integrity verification: 11 passed, 0 failed.
+- CLI priority verification: 6 passed, 0 failed.
+- Total: 295 passed, 0 failed.
+- Java syntax: 49 production/test/tool/helper files parsed, 0 syntax errors.
+
+Priority scenarios checked
+--------------------------
+1. Group ALLOW 10 vs individual DENY 1 -> individual DENY wins.
+2. Group DENY 10 vs individual ALLOW 1 -> individual ALLOW wins.
+3. Group ALLOW 1 vs individual DENY 10 -> group ALLOW wins.
+4. Group DENY 1 vs individual ALLOW 10 -> group DENY wins.
+5. Class priority 1 vs group 10 vs individual 20 -> class wins.
+6. Class priority 30 vs group 20 vs individual 10 -> individual wins.
+7. Matching priorities 1,10,10 -> PRIORITY CONFLICT ERROR; no winner.
+8. Matching duplicated priority tiers 5,5 and 10,10 -> both tiers and all four participants are reported.
+9. Same priority on disjoint days -> no conflict for a request matching only one.
+10. Same priority on different rooms -> no conflict for a request matching only one.
+11. Group rule for a nonmember -> does not participate.
+12. Same-effect policies with repeated priority -> conflict error.
+13. Three-way class/group/individual repeated priority -> one consolidated error.
+14. Source order does not break repeated-priority conflicts.
+15. Optimizer equivalence preserves all matching rules and all repeated-priority participants.
+
+Authoritative rule
+------------------
+See docs/PRIORITY_RULES_V18.md. V18 supersedes earlier V17 documentation that only checked a tie at the smallest/highest-precedence priority.
+
+Windows final verification still required
+------------------------------------------
+On the target Windows machine, run from the inner `policyscript-project` folder:
+  mvn -U clean test
+  mvn -U clean verify
+  mvn javafx:run
+
+This record does not claim that Maven or the JavaFX application was successfully built or launched.

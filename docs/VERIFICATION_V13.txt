@@ -1,0 +1,32 @@
+PolicyScript V13 — verification record
+
+Dependency-free verification command:
+  bash tools/run-core-verification.sh
+
+Observed results in the authoring container:
+  Core compiler verification:             92 passed, 0 failed
+  Academic management/policy verification: 92 passed, 0 failed
+  Academic priority matrix:               32 passed, 0 failed
+      30 end-to-end matrix scenarios + 2 tie-break assertions
+  Choice selector verification:            5 passed, 0 failed
+  UI integration structure verification:  24 passed, 0 failed
+  Total dependency-free checks:          245 passed, 0 failed
+  Java syntax parser:                    46 files, 0 syntax errors
+
+The new JUnit priority test source was type-checked against minimal JUnit API signatures
+after the dependency-free production compile. Its seven test methods were also invoked by
+a temporary local harness with functional assertions and per-test temporary directories:
+  AcademicPrioritySemanticsTest methods: 7 passed, 0 failed.
+This harness executes the test method bodies but is NOT the official JUnit engine.
+
+Priority matrix scenarios exercise the real academic repository and compiler pipeline:
+AcademicRepository -> AcademicPolicyCompiler -> CompilationService -> Lexer -> Parser
+-> Semantic Analysis -> IR -> PolicyAnalyzer -> Optimizer -> DecisionEngine.
+For each scenario, original and optimized results are compared for the final decision
+AND winning policy identity/effect/priority/source order.
+
+Important environment limitation:
+  Maven is not installed in the authoring container. Therefore `mvn clean test`,
+  `mvn clean verify`, and `mvn javafx:run` were NOT run here. A Windows workstation
+  with JDK 17+ and Maven must run these commands before the complete desktop build and
+  launch can be declared verified.

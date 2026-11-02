@@ -1,0 +1,35 @@
+.root {
+    -fx-font-family: "Inter", "Segoe UI", sans-serif;
+    -fx-font-size: 13px;
+    -fx-background-color: #f3f6fb;
+    -fx-text-fill: #17263b;
+}
+.topbar { -fx-background-color: #101f36; -fx-padding: 18 24 18 24; -fx-spacing: 14; }
+.brand { -fx-text-fill: #ffffff; -fx-font-size: 22px; -fx-font-weight: 800; }
+.subtitle { -fx-text-fill: #b7c9df; -fx-font-size: 12px; }
+.section-title { -fx-text-fill: #12233b; -fx-font-size: 19px; -fx-font-weight: 800; }
+.muted { -fx-text-fill: #65758c; }
+.card { -fx-background-color: #ffffff; -fx-background-radius: 12px; -fx-border-color: #dbe4ef; -fx-border-radius: 12px; -fx-padding: 16px; }
+.stat-value { -fx-font-size: 25px; -fx-font-weight: 800; -fx-text-fill: #142843; }
+.stat-label { -fx-font-size: 11px; -fx-font-weight: 700; -fx-text-fill: #718198; }
+.button { -fx-background-color: #e6edf7; -fx-text-fill: #173453; -fx-background-radius: 7px; -fx-padding: 8 13 8 13; -fx-font-weight: 700; -fx-cursor: hand; }
+.button.primary { -fx-background-color: #167d91; -fx-text-fill: white; }
+.button:hover { -fx-opacity: 0.88; }
+.button:disabled { -fx-opacity: 0.48; }
+.tab-pane .tab-header-area { -fx-padding: 7 12 0 12; }
+.tab-pane .tab { -fx-background-color: #e7edf5; -fx-background-radius: 7 7 0 0; }
+.tab-pane .tab:selected { -fx-background-color: white; }
+.tab-pane .tab-label { -fx-text-fill: #30425b; -fx-font-weight: 700; }
+.text-area, .code-area { -fx-font-family: "Cascadia Code", "Consolas", monospace; -fx-font-size: 13px; }
+.text-area { -fx-control-inner-background: #fbfcfe; -fx-background-color: #fbfcfe; -fx-border-color: #d9e2ee; -fx-border-radius: 7px; }
+.table-view { -fx-background-color: white; -fx-border-color: #dbe4ef; -fx-border-radius: 8px; }
+.table-view .column-header-background { -fx-background-color: #edf2f8; }
+.table-view .column-header .label { -fx-text-fill: #425570; -fx-font-weight: 800; }
+.label.error { -fx-text-fill: #b42336; }
+.label.success { -fx-text-fill: #087f5b; }
+.code-area { -fx-background-color: #fbfcff; }
+.code-area .text { -fx-fill: #253c58; }
+.keyword { -fx-fill: #125f9a; -fx-font-weight: bold; }
+.time-literal { -fx-fill: #087f70; -fx-font-weight: bold; }
+.priority-literal { -fx-fill: #ab5c11; -fx-font-weight: bold; }
+.paragraph-box:has-caret { -fx-background-color: #edf5fc; }

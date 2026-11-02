@@ -1,0 +1,17 @@
+PolicyScript V12 verification report
+
+Dependency-free compiler/academic/UI integration runner:
+- Compiler verification: 90 passed, 0 failed.
+- Academic verification: 92 passed, 0 failed.
+- Choice selector verification: 5 passed, 0 failed.
+- UI integration structure verification: 20 passed, 0 failed.
+- Java production source syntax: 36 files parsed, 0 syntax errors.
+- Total dependency-free assertions/checks: 207 passed, 0 failed.
+
+JUnit-method execution using a temporary local JUnit-compatible shim:
+- AcademicChoiceTest: 4 passed.
+- BuildClasspathSmokeTest: 3 passed.
+- PolicyScriptCompilerTest: 81 passed.
+- Total test methods: 88 passed, 0 failed.
+
+The local environment does not have Maven installed and cannot resolve repo.maven.apache.org, so the actual Maven/Surefire/JUnit lifecycle and full JavaFX compile/launch were not run here. The local JUnit-compatible harness is not represented as a Maven/JUnit build. Verify with `mvn -U clean verify` on the Windows workstation.

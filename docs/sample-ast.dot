@@ -1,0 +1,29 @@
+digraph PolicyScriptAST {
+  rankdir=TB;
+  graph [fontname=Arial, bgcolor="white"];
+  node [shape=box, style="rounded,filled", fillcolor="#f2f7fc", color="#9aaec4", fontname=Arial, fontsize=10];
+  edge [color="#8ea3bb"];
+  root [label="Program", fillcolor="#dcebf5"];
+  rule1 [label="PolicyRule 1", fillcolor="#deeff0"];
+  root -> rule1;
+  effect0_0 [label="Effect: ALLOW"];
+  rule1 -> effect0_0;
+  role0_1 [label="Role: student"];
+  rule1 -> role0_1;
+  resource0_2 [label="Resource: computer_lab"];
+  rule1 -> resource0_2;
+  conditionNode3 [label="AND", fillcolor="#fff2d8"];
+  conditionNode4 [label="Parenthesized expression", fillcolor="#fff2d8"];
+  conditionNode5 [label="OR", fillcolor="#fff2d8"];
+  conditionNode6 [label="day = Monday", fillcolor="#fff2d8"];
+  conditionNode7 [label="day = Friday", fillcolor="#fff2d8"];
+  conditionNode5 -> conditionNode6;
+  conditionNode5 -> conditionNode7;
+  conditionNode4 -> conditionNode5;
+  conditionNode8 [label="time BETWEEN 09:00 AND 17:00", fillcolor="#fff2d8"];
+  conditionNode3 -> conditionNode4;
+  conditionNode3 -> conditionNode8;
+  rule1 -> conditionNode3;
+  priority0_9 [label="Priority: 0 (default)"];
+  rule1 -> priority0_9;
+}

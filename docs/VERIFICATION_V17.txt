@@ -1,0 +1,33 @@
+PolicyScript V17 — verification record
+=======================================
+
+Dependency-free verification command:
+  bash tools/run-core-verification.sh
+
+Observed results in the authoring environment:
+  Core compiler verification:                 92 passed, 0 failed
+  Academic management/policy verification:    92 passed, 0 failed
+  Academic cross-scope priority matrix:        31 passed, 0 failed
+  Priority-conflict diagnostics:              16 passed, 0 failed
+  Choice selector verification:                5 passed, 0 failed
+  UI integration source audit:                29 passed, 0 failed
+  Workspace management verification:           9 passed, 0 failed
+  Deletion integrity verification:             11 passed, 0 failed
+  CLI priority behavior:                      5 passed, 0 failed
+  Total dependency-free checks:              290 passed, 0 failed
+  Java source syntax parser:              49 files, 0 syntax errors
+
+Additional tests:
+  - All 101 JUnit test methods across the four test classes were compiled and invoked with a temporary local compatibility harness that implements only the JUnit annotations/assertions used by this project: 101 passed, 0 failed. This is NOT the official JUnit engine and must not be represented as `mvn test`.
+  - Five repeatable CLI checks verify: equal-highest-priority conflict exits with code 4; CLI output says no decision was issued (not default DENY); smaller numeric priority wins; equal priorities on disjoint weekdays do not conflict; and policy-only analysis still reports the priority error without an explicit request.
+  - Fresh project extraction and ZIP integrity verification completed.
+
+Priority behavior:
+  - Lowest (smallest numeric) priority wins across class/group/individual scopes.
+  - If two or more matching policies share the smallest numeric priority, the request is a PRIORITY CONFLICT ERROR and no access decision is issued.
+  - Lower-tier ties beneath a unique smallest priority do not block that request.
+  - Different student/group membership, rooms, weekdays, or times do not conflict unless both policies match the same request.
+  - Optimizer equivalence preserves exact conflict participant sets, not merely a boolean DENY.
+
+Build limitation:
+  Maven is not installed in the authoring environment and Maven Central was not reachable. The official `mvn -U clean test`, `mvn -U clean verify`, and JavaFX desktop launch were NOT run here. Run those commands on the target Windows/JDK machine before declaring the full desktop build verified.

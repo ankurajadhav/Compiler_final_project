@@ -1,0 +1,208 @@
+PASS  lexer recognizes reserved keywords and fields
+PASS  lexer supports identifiers with underscores
+PASS  lexer reports correct coordinates after CRLF newline
+PASS  lexer reports correct coordinates after CR-only newline
+PASS  lexer rejects non-ASCII digits outside the literal grammar
+PASS  lexer rejects characters outside documented ASCII identifier grammar
+PASS  lexer recognizes HH:mm token
+PASS  shaped but out-of-range time is deferred to semantic validation
+PASS  lexer distinguishes integer priority
+PASS  lexer reports invalid characters
+PASS  lexer rejects malformed time shape
+PASS  lexer recognizes all comparison operators
+PASS  line comments and managed-source marker lines are ignored without changing policy compilation
+PASS  parser accepts simple policy
+PASS  parser accepts multiple policies
+PASS  parser accepts conditions and priority
+PASS  parser implements AND-before-OR precedence
+PASS  parser preserves explicit parenthesized-expression AST node
+PASS  AST tree exposes parenthesized expression
+PASS  AST DOT exposes parenthesized expression
+PASS  semantic analysis validates inside parentheses
+PASS  parser rejects missing semicolon
+PASS  parser rejects incomplete BETWEEN
+PASS  parser rejects empty program
+PASS  semantic role validation
+PASS  semantic resource validation
+PASS  semantic invalid time validation
+PASS  semantic day validation
+PASS  semantic unsupported field validation
+PASS  semantic type mismatch validation
+PASS  semantic day operator validation
+PASS  semantic priority overflow validation
+PASS  semantic reversed range validation
+PASS  analysis detects duplicates
+PASS  analysis detects direct conflict
+PASS  analysis detects conditional overlap
+PASS  analysis respects disjoint time intervals
+PASS  analysis respects disjoint weekdays
+PASS  analysis detects impossible Boolean condition
+PASS  analysis identifies a rule that never wins as shadowed
+PASS  analysis distinguishes a sometimes-winning decision-redundant rule
+PASS  analysis reports partial shadowing without false full-shadow claim
+PASS  engine grants in-range request
+PASS  engine defaults to deny outside range
+PASS  engine time comparison uses chronological values
+PASS  smaller numeric priority is more important
+PASS  lower-numbered DENY can override higher-numbered ALLOW
+PASS  omitted priority defaults to zero and beats priority ten
+PASS  engine makes DENY win equal priority
+PASS  bit-set equivalence proof agrees with runtime resolver on its counterexample
+PASS  bundled priority example lets priority 1 beat priority 10
+PASS  default priority zero is more important than max integer priority
+PASS  IR labels omitted priority as default zero
+PASS  lower-numbered ALLOW can override higher-numbered DENY
+PASS  engine applies default deny if no rule matches
+PASS  engine evaluates weekday predicates
+PASS  computer_lab is the canonical laboratory resource
+PASS  optimized decisions match runtime resolver for every minute of all seven days across multiple scopes
+PASS  optimizer removes semantic duplicates
+PASS  optimizer simplifies dominant time condition
+PASS  optimizer verifies final equivalence exhaustively
+PASS  optimizer preserves decision-changing priority DENY
+PASS  optimizer safely removes unreachable policy
+PASS  compiler produces end-to-end IR and analysis
+PASS  time range includes 00:00 and 23:59 endpoints
+PASS  equal endpoints represent one inclusive minute
+PASS  weekday value is normalized in typed IR
+PASS  optimizer keeps OR semantics while simplifying
+PASS  optimizer preserves grouped condition decisions
+PASS  omitted and explicit zero priorities are exact duplicates
+PASS  request time parser accepts HH:mm
+PASS  request time parser rejects seconds
+PASS  request time parser rejects single-digit hour
+PASS  request time parser rejects out-of-range time
+PASS  access request rejects non-minute values
+PASS  Access Tester accepts canonical, single-hour and compact entries
+PASS  Access Tester normalizes compact input to HH:mm
+PASS  Access Tester rejects malformed and out-of-range times
+PASS  bundled demo policy compiles with faculty server-room access
+PASS  faculty can access server_room even outside usual computer_lab hours
+PASS  guest is denied from server_room
+PASS  student receives default DENY for server_room
+PASS  demo student access at 11:00 is granted
+PASS  demo student access at 14:00 is denied by a matching rule, not default DENY
+PASS  demo student access at 18:00 uses default DENY
+PASS  bundled configuration exposes only canonical resources
+PASS  legacy lab identifier is rejected by bundled configuration
+PASS  configuration rejects missing roles/resources schema
+PASS  configuration rejects malformed JSON separators
+PASS  configuration rejects retired lab identifier
+
+Verification summary: 90 passed, 0 failed.
+PASS  bulk student parser accepts comma and tab rows, skips blanks and preserves commas in names
+PASS  bulk student parser identifies the exact malformed input row
+PASS  bulk student parser rejects input containing no student rows
+PASS  multiple students can be enrolled together in an existing class
+PASS  multiple students can be enrolled together in a newly created class
+PASS  bulk enrolment rejects duplicate IDs in the same batch without a partial insert
+PASS  bulk enrolment rejects an existing roll number without partial insertion
+PASS  bulk enrolment rejects case-insensitive duplicate IDs without partial insertion
+PASS  multiple selected students can be appended to an existing group without losing prior members
+PASS  adding an existing group member again is safely idempotent
+PASS  group append validates all selected IDs before changing membership
+PASS  a new student can be added later to an existing class
+PASS  newly enrolled students can immediately be added to an existing custom group
+PASS  new classes can be created and duplicate class codes are rejected
+PASS  class codes are unique regardless of letter case
+PASS  new teachers can be registered and duplicate employee IDs are rejected
+PASS  teacher employee IDs are unique regardless of letter case
+PASS  student register numbers are unique regardless of letter case
+PASS  class/course names stay consistent across additional teachers and timetable slots
+PASS  academic data expands into real PolicyScript and compiles
+PASS  generated academic policy passes decision-equivalence optimization
+PASS  a timetable alone does not grant access to an enrolled student
+PASS  student-group DENY is evaluated for a current group member
+PASS  higher-precedence individual ALLOW can override group DENY
+PASS  teacher assignments remain timetable metadata and are not expanded into student access policies
+PASS  new class student receives access only because its explicit class ALLOW intersects the scheduled room/time
+PASS  room-unspecified class ALLOW is limited to the first room's actual timetable slot
+PASS  room-unspecified class ALLOW does not spill into a later room before its slot
+PASS  room-unspecified class ALLOW applies during the later room's own slot
+PASS  new class student is denied at the exclusive end of the new slot
+PASS  timetable end time is exclusive
+PASS  same student is denied in a non-scheduled room
+PASS  class-level policy expands to every student in its class
+PASS  class-level policy observes its exclusive end time
+PASS  group policy expands only to actual target members for its explicitly selected room
+PASS  group policy applies to a student appended after the group was first created
+PASS  group policy includes newly bulk-enrolled members in generated PolicyScript
+PASS  a CLASS policy applies to the target class's own scheduled slot
+PASS  a CLASS policy cannot leak to a different class's adjacent slot for the same student
+PASS  a CLASS policy cannot create access to a room that is not allocated to that class session
+PASS  an explicit student-group ALLOW can authorize its current members without a timetable slot
+PASS  an individual DENY overrides a group ALLOW only for the exact student
+PASS  removing a student from a group removes that group's generated authorization after regeneration
+PASS  overlapping slots for the same class are rejected
+PASS  overlapping occupancy of the same room is rejected
+PASS  a teacher cannot be scheduled for overlapping classes
+PASS  custom group membership can be updated
+PASS  newly created classes and teachers persist with their linked academic records
+PASS  failed class persistence rolls the in-memory record back
+PASS  failed teacher persistence rolls the in-memory record back
+PASS  unreadable academic data is preserved in a safety backup before workspace recovery
+PASS  recovered workspace persists new data while preserving the original safety backup
+PASS  writes are blocked when an unreadable data path cannot be safely backed up
+PASS  large demo replacement creates a backup and seeds 8 classes, 200 students, 5 groups, 16 teachers, 16 assignments, 16 slots and 5 policies
+PASS  large fictional demo data survives application restart and includes all 200 student identities
+PASS  bundled academic demonstration dataset compiles
+PASS  demonstration group DENY is applied to a selected student
+PASS  demonstration individual ALLOW is applied to the selected student
+PASS  demonstration class ALLOW is applied only to a non-restricted student in its class
+PASS  demonstration class ALLOW does not grant an unrelated class student access
+PASS  demonstration academic policies generate only registered-student identities, never generic actor roles
+PASS  campus policy source is inserted into a managed block while preserving existing hand-written policies
+PASS  regenerating campus policies replaces the marked block even after manual edits without duplicating rules
+PASS  campus source merger refuses to overwrite an editor with damaged managed-block markers
+PASS  existing students can be enrolled in a second class without duplicating student identities
+PASS  removing a student from one class preserves their identity and other class memberships
+PASS  the same student cannot be enrolled twice in one class
+PASS  adding no selected students to a group is reported as a validation error rather than success
+PASS  an empty custom group can be created before choosing members
+PASS  selected members can be added and removed independently from an existing group
+PASS  an existing group can be edited and have its membership replaced exactly
+PASS  an existing class can be edited without changing its stable class code
+PASS  teacher records can be edited and deleted after safely removing referenced assignments and timetable sessions
+PASS  an unused class can be removed after all memberships are removed while student identities remain in other classes
+PASS  existing policies can be edited and saved with validated scope and priority
+PASS  multi-class student enrolment and changed group membership survive restart
+PASS  a new timetable slot is rejected when it overlaps another class attended by a shared student
+PASS  adding an existing student to a class is rejected when it creates an overlapping timetable
+PASS  an actually empty academic policy store is a valid empty source state
+PASS  a saved policy with no current target members remains visible in the Policy Editor as an inactive comment without creating an executable rule
+PASS  inactive saved academic policies are inserted into the one editor without overwriting handwritten rules
+PASS  regenerating an inactive saved policy replaces its managed comment instead of duplicating it
+PASS  a class policy with enrolled students but no matching class timetable remains visible and inactive in the editor
+PASS  saved inactive academic policies regenerate visibly in the editor after repository reload
+PASS  a previously inactive saved class policy becomes executable in the editor after its matching timetable is added
+PASS  removing the last academic rule removes only its managed block and preserves handwritten source
+PASS  legacy project-relative campus data migrates to stable per-user storage with saved policies intact
+PASS  importing an old campus data file restores its saved academic policies and backs up the previous workspace
+PASS  policies imported from an older project regenerate into the single Policy Editor source
+PASS  an invalid previous campus file is rejected without replacing the currently loaded policies
+PASS  Refresh Saved Policies reloads the committed file and restores a policy saved after the app view was opened
+PASS  failed saved-policy refresh reports corrupted data while preserving the current in-memory records
+Academic verification: 92 passed, 0 failed.
+Choice selector verification: 5 passed, 0 failed.
+PASS  the JavaFX navigation contains exactly one Policy Editor tab
+PASS  the JavaFX navigation contains exactly one academic Access Control tab
+PASS  the access-control view is student-only and does not expose generic actor modes
+PASS  the only academic policy scopes are class, custom group and individual student
+PASS  academic changes automatically refresh the managed source block in the single editor
+PASS  Campus Management provides navigation to the same Policy Editor after saving academic policies
+PASS  saved inactive policy comments remain in the editor without enabling an empty compile or granting access
+PASS  saved campus policies are restored after the main editor's initial text is installed
+PASS  manual saved-policy refresh reloads the committed disk file before regenerating the editor block
+PASS  manual saved-policy refresh opens the same original Policy Editor after successful synchronization
+PASS  refresh button remains enabled when the workspace has zero policies so stale editor blocks can be cleared
+PASS  large fictional demo data can be loaded with a replacement confirmation and a backup
+PASS  campus records use stable per-user storage with migration from the former project-relative file
+PASS  a previous campus data file can be safely imported with validation and backup
+PASS  the application maximizes to screen bounds and adapts minimum dimensions
+PASS  the campus tab uses its own responsive sections instead of a nested outer scroll-pane wrapper
+PASS  compiler phases are delegated to the real lexer, parser, semantic analyzer, policy analyzer and optimizer
+PASS  academic policy forms contain only the requested three academic scopes
+PASS  a registered student with no matching rules reaches the real resolver's default DENY
+PASS  editing the source invalidates the previous academic compile snapshot until it is regenerated
+UI integration structure verification: 20 passed, 0 failed.
+Production Java syntax: 36 files parsed; 0 syntax error(s).

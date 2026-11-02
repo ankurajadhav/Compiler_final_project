@@ -1,0 +1,14 @@
+PolicyScript V14 verification summary
+
+Dependency-free checks:
+- Core compiler: 92 passed, 0 failed
+- Academic management: 92 passed, 0 failed
+- Academic numeric-priority matrix: 32 passed, 0 failed
+- Equal-priority conflict diagnostics: 18 passed, 0 failed
+- Choice selectors: 5 passed, 0 failed
+- UI integration checks: 24 passed, 0 failed
+- Java syntax parser: 47 source/test/tool files parsed, 0 syntax errors
+
+Total executable dependency-free assertions: 263 passed, 0 failed.
+
+Important: this is not a full Maven/JUnit/JavaFX build. Maven is not installed in the authoring environment. Run `mvn -U clean test` on the target Windows machine to verify Maven dependency resolution, JUnit execution and JavaFX packaging.

@@ -1,0 +1,2 @@
+DENY student TO access computer_lab PRIORITY 10;
+ALLOW student TO access computer_lab PRIORITY 1;

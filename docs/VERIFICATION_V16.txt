@@ -1,0 +1,59 @@
+POLICYSCRIPT V16 VERIFICATION RECORD
+====================================
+
+Source baseline: PolicyScript V15 final audited source
+Build configuration update: JDK-dependent JavaFX/RichTextFX profiles, current
+stable Maven compiler/resources/jar plugins, JUnit Jupiter 5.14.4.
+
+DEPENDENCY-FREE VERIFICATION
+---------------------------
+Command: bash tools/run-core-verification.sh
+Result from the V16 working tree: PASS
+- Original compiler: 92 passed, 0 failed
+- Academic management/policy: 92 passed, 0 failed
+- Cross-scope priority matrix: 32 passed, 0 failed
+- Priority conflict diagnostics: 18 passed, 0 failed
+- Choice selector models: 5 passed, 0 failed
+- UI integration/source wiring: 29 passed, 0 failed
+- Workspace clear/backup/restore: 9 passed, 0 failed
+- Relationship-safe deletion: 11 passed, 0 failed
+Total: 288 passed, 0 failed
+
+JAVA SYNTAX
+-----------
+The JDK compiler-tree parser inspected 49 production, JUnit-test and helper Java
+files and reported 0 syntax errors. This parser does not type-check JavaFX imports.
+
+JUNIT TEST SOURCE EXECUTION (SUPPLEMENTAL, NOT OFFICIAL SUREFIRE)
+------------------------------------------------------------------
+The 4 JUnit test classes compiled and 95 @Test methods were invoked with a local
+minimal JUnit-API compatibility harness because the official JUnit artifacts could
+not be downloaded in this environment. Result: 95 passed, 0 failed.
+This is supplemental source/test execution only; it is not a Maven Surefire run and
+does not replace the official JUnit engine.
+
+MAVEN CONFIGURATION
+-------------------
+- pom.xml parsed as valid XML.
+- JDK 17/21 profile: JavaFX 21.0.6 + RichTextFX 0.11.2.
+- JDK 22 profile: JavaFX 24.0.1 + RichTextFX 0.11.2.
+- JDK 23+ profile (including user's JDK 25): JavaFX 25.0.5 + RichTextFX 0.11.7.
+- Java compiler release remains 17.
+- Maven Compiler Plugin 3.16.0.
+- Maven Resources Plugin 3.5.0.
+- Maven Jar Plugin 3.5.1.
+- Maven Surefire Plugin 3.6.1; forkCount=0 retained for the earlier Windows
+  test-runtime classpath issue.
+- JUnit Jupiter 5.14.4.
+
+The selected profile values and pinned versions were checked statically in the POM.
+Artifact coordinates and JavaFX/RichTextFX compatibility were checked against
+public release information, but dependencies were not downloaded here.
+
+OFFICIAL MAVEN / JAVAFX BUILD STATUS
+------------------------------------
+NOT RUN. `mvn` is not installed in this authoring environment, ~/.m2 is empty,
+and DNS resolution to Maven Central is unavailable. Therefore this record does NOT
+claim `mvn clean test`, `mvn clean verify`, a JavaFX compile, or a desktop launch
+passed. Run those commands on the target Windows computer with a reachable Maven
+Central or approved corporate mirror.

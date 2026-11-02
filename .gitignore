@@ -1,0 +1,8 @@
+target/
+build-check/
+build-core-verification/
+*.class
+*.log
+.idea/
+.vscode/
+/data/academic-data.psdb

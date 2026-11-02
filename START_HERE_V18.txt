@@ -1,0 +1,26 @@
+POLICYSCRIPT V18 — STRICT MATCHING-PRIORITY VALIDATION
+
+1. Extract this ZIP to a new folder, preferably outside OneDrive, for example:
+   C:\Projects\PolicyScript-V18
+2. Open the inner policyscript-project folder in VS Code.
+3. Check `java -version` and `mvn -version`. Maven must use a supported JDK.
+4. Run the dependency-free core/regression suite:
+   Windows PowerShell: .\run-core-verification.bat
+   Bash: bash tools/run-core-verification.sh
+5. Run the official Maven/JUnit build:
+   mvn -U clean test
+6. If tests pass, run:
+   mvn -U clean verify
+7. Launch the JavaFX application:
+   mvn javafx:run
+
+V18 academic priority rule:
+- Consider only policies that match the same student, exact room/resource, weekday and time.
+- If any numeric priority repeats anywhere in that matching set, show PRIORITY CONFLICT ERROR and issue no ALLOW/DENY decision. This remains an error even if another matching rule has a smaller number (for example, 1, 10, 10).
+- If all matching priority values are distinct, the smallest numeric value wins, regardless of class/group/individual scope or ALLOW/DENY effect.
+- Equal values on policies that do not match the same request do not conflict.
+- No matching policy means default DENY.
+
+Academic data remains in the stable per-user workspace under `%USERPROFILE%\.policyscript\academic-data.psdb`. Back up this file before any major workspace replacement or demo reset.
+
+Full verification record: docs/VERIFICATION_V18.txt. Official Maven/JUnit verification must be run on the target Windows machine; do not infer Maven success from the dependency-free script.

@@ -1,0 +1,52 @@
+POLICYSCRIPT V16 — JDK-ALIGNED BUILD CONFIGURATION
+
+This release retains the existing source tree, academic data, compiler, UI, and
+verification tests from V15. It corrects the JavaFX/RichTextFX dependency pair for
+the JDK version used by the build machine.
+
+JDK PROFILE SELECTION (automatic Maven activation)
+- JDK 17 or 21: JavaFX 21.0.6 + RichTextFX 0.11.2
+- JDK 22:       JavaFX 24.0.1 + RichTextFX 0.11.2
+- JDK 23 or newer (including JDK 25): JavaFX 25.0.5 + RichTextFX 0.11.7
+- Java source and bytecode compatibility remains Java 17 (`--release 17`).
+
+The JavaFX 25 pair is important for JDK 25: JavaFX 25 requires JDK 23+ and
+RichTextFX versions before 0.11.7 have a JavaFX 25 API clash.
+
+BUILD
+1. Open the inner `policyscript-project` folder.
+2. Confirm `java -version` and `mvn -version`.
+3. Run `mvn -U clean test`.
+4. Run `mvn -U clean verify`.
+5. Only after BUILD SUCCESS, run `mvn javafx:run`.
+
+Maven output remains outside the project folder at:
+  %USERPROFILE%\.policyscript\build\policyscript-compiler
+
+Do not use -DskipTests. If dependencies cannot be downloaded, the build cannot
+complete until Maven Central or an approved Maven mirror is reachable.
+
+ACADEMIC DATA
+The persistent academic workspace remains:
+  %USERPROFILE%\.policyscript\academic-data.psdb
+Back it up before installing or clearing workspaces.
+
+DEMO
+Campus Management > Load large fictional demo (200 students)
+Seeds 8 classes, 200 students, 5 groups, 16 teachers, 16 assignments,
+16 timetable slots and 5 academic policies. Loading it backs up the old workspace.
+
+CLEAR
+Campus Management > Clear all campus data / remove demo
+This removes all current campus entities after confirmation and creates a
+recoverable backup first.
+
+PRIORITY
+Smaller number wins; DENY wins opposite-effect equal-priority ties; source order
+selects the primary explanation for same-effect equal-priority matches; default
+is DENY when nothing matches. Scope does not create implicit priority.
+
+VERIFICATION BOUNDARY
+Dependency-free verification is included. The authoring environment does not have
+Maven installed and cannot access Maven Central, so a real Maven/JUnit/JavaFX build
+has NOT been claimed. Run the Maven commands above on the target Windows system.

@@ -1,0 +1,4 @@
+{
+  "roles": ["student", "faculty", "guest"],
+  "resources": ["computer_lab", "server_room"]
+}

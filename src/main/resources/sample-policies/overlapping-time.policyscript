@@ -1,0 +1,2 @@
+ALLOW student TO access computer_lab WHEN time BETWEEN 09:00 AND 17:00 PRIORITY 10;
+DENY student TO access computer_lab WHEN time BETWEEN 12:00 AND 14:00 PRIORITY 1;

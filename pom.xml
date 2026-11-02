@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>edu.policyscript</groupId>
+  <artifactId>policyscript-compiler</artifactId>
+  <version>1.0.0</version>
+  <name>PolicyScript Compiler</name>
+  <description>A domain-specific compiler for access-control policy analysis and optimization.</description>
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.release>17</maven.compiler.release>
+    <javafx.version>21.0.6</javafx.version>
+    <richtextfx.version>0.11.2</richtextfx.version>
+    <junit.version>5.14.4</junit.version>
+  </properties>
+  <dependencies>
+    <dependency>
+      <groupId>org.openjfx</groupId><artifactId>javafx-controls</artifactId><version>${javafx.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.fxmisc.richtext</groupId><artifactId>richtextfx</artifactId><version>${richtextfx.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId><artifactId>junit-jupiter</artifactId><version>${junit.version}</version><scope>test</scope>
+    </dependency>
+  </dependencies>
+  <profiles>
+    <!-- JavaFX 21 officially supports JDK 17 and JDK 21. -->
+    <profile>
+      <id>javafx-jdk-17-21</id>
+      <activation><jdk>[17,22)</jdk></activation>
+      <properties>
+        <javafx.version>21.0.6</javafx.version>
+        <richtextfx.version>0.11.2</richtextfx.version>
+      </properties>
+    </profile>
+    <!-- JavaFX 24 is compiled for JDK 21 and works on JDK 22. -->
+    <profile>
+      <id>javafx-jdk-22</id>
+      <activation><jdk>[22,23)</jdk></activation>
+      <properties>
+        <javafx.version>24.0.1</javafx.version>
+        <richtextfx.version>0.11.2</richtextfx.version>
+      </properties>
+    </profile>
+    <!-- JavaFX 25 requires JDK 23+; RichTextFX 0.11.7 fixes its JavaFX 25 API clash. -->
+    <profile>
+      <id>javafx-jdk-23-plus</id>
+      <activation><jdk>[23,)</jdk></activation>
+      <properties>
+        <javafx.version>25.0.5</javafx.version>
+        <richtextfx.version>0.11.7</richtextfx.version>
+      </properties>
+    </profile>
+  </profiles>
+
+  <build>
+    <!--
+      Keep generated build output outside the extracted project directory. This is
+      intentional for Windows users whose project folder is under OneDrive: the
+      synchronizer/IDE can otherwise hold target\test-classes open and make the
+      Maven Clean Plugin fail before compilation starts.
+    -->
+    <directory>${user.home}/.policyscript/build/${project.artifactId}</directory>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId><artifactId>maven-clean-plugin</artifactId><version>3.4.1</version>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId><artifactId>maven-resources-plugin</artifactId><version>3.5.0</version>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId><artifactId>maven-compiler-plugin</artifactId><version>3.16.0</version>
+        <configuration><release>${maven.compiler.release}</release></configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId><artifactId>maven-jar-plugin</artifactId><version>3.5.1</version>
+      </plugin>
+      <plugin>
+        <groupId>org.openjfx</groupId><artifactId>javafx-maven-plugin</artifactId><version>0.0.8</version>
+        <configuration><mainClass>com.policyscript.ui.PolicyScriptApp</mainClass></configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId><artifactId>maven-surefire-plugin</artifactId><version>3.6.1</version>
+        <configuration>
+          <useModulePath>false</useModulePath>
+          <!-- Run tests in Maven's own VM. This avoids Surefire's forked/manifest
+               classpath on affected Windows + JDK 25 installations, where project
+               classes and classpath resources were present in output but invisible
+               to the forked test JVM. It also removes the fragile manifest-only JAR. -->
+          <forkCount>0</forkCount>
+          <failIfNoTests>true</failIfNoTests>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId><artifactId>exec-maven-plugin</artifactId><version>3.5.0</version>
+      </plugin>
+    </plugins>
+  </build>
+</project>

@@ -1,0 +1,2 @@
+ALLOW student TO access computer_lab
+WHEN (day = Monday OR day = Friday) AND time BETWEEN 09:00 AND 17:00;

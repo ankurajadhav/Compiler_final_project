@@ -1,0 +1,20 @@
+PolicyScript V15 verification summary
+
+Dependency-free regression suites (fresh extraction):
+- Original compiler core: 92 passed, 0 failed
+- Academic management and policy: 92 passed, 0 failed
+- Cross-scope numeric priority matrix: 32 passed, 0 failed
+- Equal-priority conflict diagnostics: 18 passed, 0 failed
+- Choice selector models: 5 passed, 0 failed
+- UI integration and button wiring: 29 passed, 0 failed
+- Workspace clear / backup / restore: 9 passed, 0 failed
+- Relationship-safe deletion: 11 passed, 0 failed
+
+Total dependency-free assertions: 288 passed, 0 failed.
+Java source parser: 49 source/test/helper files parsed, 0 syntax errors.
+JavaFX buttons statically checked: 46 of 46 have action handlers.
+POM XML validation: passed.
+Fresh ZIP extraction and ZIP integrity: passed.
+
+Important limitation:
+Maven is not installed in the authoring environment and Maven dependency hosts could not be resolved. The official Maven/JUnit build, package goal and JavaFX application launch were not executed here. Run `mvn -U clean test`, `mvn clean package`, and `mvn javafx:run` on the target Windows computer before claiming full desktop-build verification.

@@ -1,0 +1,2 @@
+ALLOW student TO access computer_lab;
+ALLOW student TO access computer_lab;

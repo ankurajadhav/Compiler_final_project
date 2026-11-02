@@ -1,0 +1,4 @@
+ALLOW student TO access computer_lab
+WHEN time > 08:00 AND time > 10:00;
+ALLOW student TO access computer_lab
+WHEN time > 10:00 AND time > 08:00;

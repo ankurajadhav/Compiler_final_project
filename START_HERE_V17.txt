@@ -1,0 +1,28 @@
+POLICYSCRIPT V17 — START HERE
+=============================
+
+1) Extract this ZIP into a new folder outside OneDrive if possible, e.g. C:\Projects\PolicyScript-V17.
+2) Open the inner policyscript-project folder (the one containing pom.xml) in VS Code.
+3) Open a PowerShell terminal in that exact folder and check: `Get-Location` and `Test-Path .\pom.xml`.
+4) Check `java -version` and `mvn -version`. The Maven process must use the installed JDK. The pom selects a matching JavaFX/RichTextFX profile for the detected JDK, while compiling application source with Java release 17.
+5) Run the fast JDK-only verification: `run-core-verification.bat`.
+6) Run the official Maven/JUnit test suite: `mvn -U clean test`.
+7) Run the full Maven lifecycle: `mvn -U clean verify`.
+8) Launch the desktop app: `mvn javafx:run`.
+
+CURRENT PRIORITY RULE
+---------------------
+- Smaller numeric priority wins across class, group and individual-student policies.
+- If two or more policies matching the same request share the smallest numeric priority, the result is PRIORITY CONFLICT ERROR and no ALLOW/DENY decision is issued.
+- No scope, effect or source-order tie-break is applied.
+- A tie among lower priorities does not block a request with a unique smaller-numbered winner.
+
+The current test/priority record is in docs/VERIFICATION_V17.txt and docs/PRIORITY_CONFLICT_ERRORS_V17.md.
+
+DATA SAFETY
+-----------
+Academic data is stored outside the project under %USERPROFILE%\.policyscript\academic-data.psdb on Windows. Back up this file before replacing or moving a project. The large fictional demo load and Clear Campus Data actions require confirmation and create a backup before replacement/clear.
+
+BUILD VERIFICATION LIMITATION
+-----------------------------
+The project archive was syntax-parsed and passed the dependency-free verification on the authoring machine. The official Maven/JUnit build and JavaFX desktop launch were not run in this environment. Do not assume BUILD SUCCESS until `mvn -U clean test` and `mvn -U clean verify` complete successfully on your computer.

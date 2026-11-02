@@ -1,0 +1,22 @@
+digraph PolicyScriptArchitecture {
+  rankdir=LR;
+  graph [bgcolor="white", pad=0.25, nodesep=0.36, ranksep=0.55, fontname="Arial", label="PolicyScript Compiler Architecture", labelloc=t, fontsize=20];
+  node [shape=box, style="rounded,filled", fontname="Arial", fontsize=10, color="#9bafc5", fillcolor="#f3f7fc", margin="0.14,0.09"];
+  edge [color="#7d95ad", penwidth=1.3, arrowsize=0.7];
+  source [label="Policy Source\n.policyscript", fillcolor="#dcecf6"];
+  lexer [label="Lexer\nTyped tokens"];
+  parser [label="Parser\nAST construction"];
+  semantic [label="Semantic Analyzer\nSymbols + type checks"];
+  ir [label="Policy IR\nTyped conditions"];
+  analysis [label="Conflict Analyzer\nOverlap + redundancy"];
+  optimizer [label="Optimizer\nVerified passes"];
+  equivalence [label="Exhaustive Equivalence Gate\n7 days × 1,440 minutes", fillcolor="#fff0d7"];
+  engine [label="Decision Engine\nPriority + DENY tie-break", fillcolor="#dff3e9"];
+  output [label="Explained Decision\nGrant / deny + winning rule", fillcolor="#dff3e9"];
+  ui [label="JavaFX Workbench\nEditor, phase views, tester", shape=component, fillcolor="#e7e9fb"];
+  source -> lexer -> parser -> semantic -> ir;
+  ir -> analysis;
+  ir -> optimizer -> equivalence -> engine -> output;
+  ui -> source [dir=both, style=dashed, label="edit / inspect"];
+  ui -> output [dir=both, style=dashed, label="test request"];
+}

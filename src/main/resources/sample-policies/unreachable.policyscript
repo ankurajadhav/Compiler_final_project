@@ -1,0 +1,2 @@
+ALLOW student TO access computer_lab
+WHEN time > 10:00 AND time < 09:00;

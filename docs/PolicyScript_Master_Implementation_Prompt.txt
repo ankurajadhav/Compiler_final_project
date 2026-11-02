@@ -1,0 +1,878 @@
+# MASTER IMPLEMENTATION PROMPT: PolicyScript
+
+## 1. Project identity and mission
+
+Build a complete, functional, well-tested Compiler Design project titled:
+
+**PolicyScript — A Domain-Specific Compiler for Access-Control Policy Analysis and Optimization**
+
+This project must demonstrate real compiler construction concepts while solving a practical problem: access-control policies often contain duplicate rules, contradictory decisions, overlapping conditions, invalid values, and unreachable rules that are difficult to identify by manual inspection.
+
+PolicyScript must compile readable access-control rules into a structured and validated policy representation, analyze policy conflicts and redundancy, apply safe optimization passes, and evaluate access requests using the resulting policy set.
+
+The project must be suitable for a university Compiler Design demonstration and strong enough to present as a software engineering portfolio project to recruiters and technical interviewers.
+
+This is a complete implementation task. Do not produce only a project plan, explanation, static mockup, screenshots, pseudocode, or disconnected code snippets. Implement the functioning application, integrate all modules, run the available tests, fix errors, and provide exact setup and execution instructions.
+
+## 2. Source of truth and scope
+
+Use the supplied PolicyScript presentation as the primary project specification. Preserve its problem statement, language terminology, compiler phases, conflict-resolution policy, intermediate representation, optimization objectives, and access-testing workflow.
+
+The required compiler pipeline is:
+
+Policy Source
+→ Lexical Analysis
+→ Syntax Analysis and AST Construction
+→ Semantic Analysis
+→ Policy Intermediate Representation
+→ Conflict and Redundancy Analysis
+→ Optimization Passes
+→ Optimized Policy Set
+→ Access Decision Engine
+→ Explained Access Decision
+
+Every phase must operate on the actual output of the previous phase. Do not simulate a successful compilation by displaying predefined results.
+
+Keep version 1 focused on the scope defined in the presentation.
+
+Required functionality:
+- ALLOW and DENY policy effects.
+- Configurable roles and resources.
+- Day-based conditions.
+- Time-based conditions and time ranges.
+- Boolean AND and OR conditions.
+- Optional numeric policy priorities.
+- Lexical, syntactic, and semantic validation.
+- Abstract syntax tree construction and visualization.
+- Policy conflict, duplicate, overlap, shadowing, and redundancy analysis.
+- Structured policy intermediate representation.
+- Safe policy optimization.
+- Interactive access-request evaluation.
+- Clear errors, warnings, optimization logs, and decision explanations.
+
+Version 1 does not require a real authentication/login system, cloud deployment, machine learning, or complex authentication protocols. Database integration is identified as future scope in the presentation; use JSON/CSV for role and resource configuration in version 1. Do not add a database or unrelated infrastructure merely to make the architecture appear more complex.
+
+## 3. Technology stack and engineering architecture
+
+Use the following technology choices:
+
+- Language: Java, preferably Java 17 or a newer compatible LTS version.
+- Build system: Maven.
+- Desktop interface: JavaFX with a polished, modern design.
+- Compiler implementation: Java.
+- Testing: JUnit 5.
+- Configuration: JSON and/or CSV.
+- AST visualization: Graphviz DOT output, with graceful fallback if the Graphviz executable is unavailable.
+- Version control compatibility: Git-friendly project structure and configuration.
+
+Prefer JavaFX over mixing Swing and JavaFX in the same application. Choose compatible dependencies and document them.
+
+The compiler must remain independent of the graphical user interface. Users should be able to test lexer, parser, semantic analyzer, optimizer, and decision-engine functionality through automated tests without launching the UI.
+
+Create a modular structure with clearly separated responsibilities. A suitable organization is:
+
+src/main/java/
+  .../lexer/
+  .../parser/
+  .../ast/
+  .../semantic/
+  .../ir/
+  .../analysis/
+  .../optimizer/
+  .../engine/
+  .../config/
+  .../diagnostics/
+  .../service/
+  .../ui/
+  .../util/
+
+src/main/resources/
+  .../styles/
+  .../sample-policies/
+  .../config/
+
+src/test/java/
+  .../lexer/
+  .../parser/
+  .../semantic/
+  .../analysis/
+  .../optimizer/
+  .../engine/
+
+Adapt package names as necessary, but preserve the modular separation.
+
+Before implementation, inspect the existing workspace and reuse any valid code or project files. Do not overwrite working code blindly. If starting from an empty directory, create the complete project from scratch.
+
+## 4. Define and implement the PolicyScript language
+
+Implement a real domain-specific language rather than a collection of hardcoded examples.
+
+The following policies must compile:
+
+Example 1:
+
+ALLOW student TO access lab;
+
+Example 2:
+
+ALLOW student TO access computer_lab
+WHEN time BETWEEN 09:00 AND 17:00;
+
+Example 3:
+
+DENY guest TO access server_room
+PRIORITY 10;
+
+Example 4:
+
+ALLOW faculty TO access lab
+WHEN day = Monday OR day = Friday
+PRIORITY 5;
+
+Example 5:
+
+ALLOW student TO access computer_lab
+WHEN time BETWEEN 09:00 AND 17:00 AND day = Monday;
+
+Example 6:
+
+DENY student TO access computer_lab
+WHEN time BETWEEN 12:00 AND 14:00
+PRIORITY 10;
+
+Treat these as actual source programs processed by the compiler.
+
+### 4.1 Language grammar and exact type rules
+
+Implement a documented, unambiguous grammar consistent with the presentation. Use a grammar along these lines, adapting token names to the implementation:
+
+```text
+program             → rule+
+rule                → effect IDENTIFIER TO ACCESS IDENTIFIER condition? priority? SEMICOLON
+effect              → ALLOW | DENY
+condition           → WHEN expression
+expression          → orExpression
+orExpression        → andExpression (OR andExpression)*
+andExpression       → primaryCondition (AND primaryCondition)*
+primaryCondition    → LPAREN expression RPAREN
+                    | timeBetween
+                    | timeComparison
+                    | dayComparison
+timeBetween         → TIME_FIELD BETWEEN TIME_LITERAL AND TIME_LITERAL
+timeComparison      → TIME_FIELD TIME_COMPARATOR TIME_LITERAL
+dayComparison       → DAY_FIELD DAY_COMPARATOR WEEKDAY
+priority            → PRIORITY INTEGER
+TIME_COMPARATOR     → = | != | < | <= | > | >=
+DAY_COMPARATOR      → = | !=
+```
+
+The lexer must recognize `TIME_FIELD` for the reserved field name `time`, `DAY_FIELD` for `day`, and weekday values Monday through Sunday. Keywords and field names are recognized case-insensitively. Role and resource identifiers are matched exactly against configuration values; do not silently lowercase or otherwise rewrite configured names. Weekday names are case-insensitive and normalized to one canonical representation.
+
+Use an identifier form such as `[A-Za-z_][A-Za-z0-9_]*` for role/resource names unless the implementation documents another precise rule. Reserve language keywords so they cannot be used as ordinary role/resource identifiers without escaping; escaping is not required in version 1.
+
+The rule order in version 1 is fixed: optional `WHEN` condition first, optional `PRIORITY` clause after it, and then a required semicolon. For example, both a conditionless priority rule and a conditioned priority rule are valid, but `PRIORITY` before `WHEN` is not valid unless the grammar is deliberately extended and documented.
+
+`program → rule+` means at least one rule is required in a compilable source file. Empty or whitespace-only source must produce a clear diagnostic rather than a false success.
+
+Support:
+- `ALLOW` and `DENY` effects.
+- `TO`, `ACCESS`, `WHEN`, `BETWEEN`, `AND`, `OR`, and `PRIORITY` keywords.
+- Parentheses for grouping Boolean conditions.
+- Configured role/resource identifiers, including underscores.
+- Time literals in exactly `HH:mm` lexical form.
+- Weekday values Monday through Sunday.
+- The field-appropriate comparison operators defined above.
+- Optional numeric priorities and multiple rules in one file.
+
+Define operator precedence as `AND` before `OR`, with parentheses taking precedence over both. Parsing must build the corresponding expression tree; do not evaluate expressions from left to right without respecting precedence.
+
+The `AND` inside `time BETWEEN 09:00 AND 17:00` is the range separator, not a Boolean operator joining two independent conditions. In a recursive-descent parser, parse a `timeBetween` primary by consuming the full `TIME_FIELD BETWEEN TIME_LITERAL AND TIME_LITERAL` sequence before returning to the general Boolean-expression parser. Thus, `time BETWEEN 09:00 AND 17:00 AND day = Monday` means the time range AND the day condition.
+
+The lexer should recognize a syntactically shaped time token such as `25:00`; semantic analysis must then reject the out-of-range value as an invalid time. A malformed shape such as `9:0x` should instead produce a lexical diagnostic. This keeps lexical, syntactic, and semantic responsibilities clear.
+
+Provide a language-reference section in the README. The application must reject syntax outside the documented grammar and must not quietly guess the author's intended meaning.
+
+### 4.2 Condition semantics
+
+Time values use a 24-hour clock and minute precision. The runtime request time is normalized to an integer minute-of-day in the range 0 through 1439.
+
+A condition such as:
+
+```text
+WHEN time BETWEEN 09:00 AND 17:00
+```
+
+means that the current time is greater than or equal to 09:00 and less than or equal to 17:00. Both endpoints are inclusive.
+
+The condition may be represented in the IR as a typed inclusive time interval or as an equivalent typed expression. Do not lose its type information or rewrite it to raw strings.
+
+Validate time values correctly:
+- `00:00`, `09:00`, and `23:59` are valid.
+- `25:00` and `12:75` are invalid semantic values.
+- Missing digits, malformed literals, or invalid separators are lexical errors.
+
+Only `time` and `day` are condition fields supported in version 1. For `time`, support `=`, `!=`, `<`, `<=`, `>`, and `>=`, in addition to `BETWEEN`. For `day`, support only `=` and `!=`; do not assign an artificial chronological order to weekdays. A day comparison value must be one of Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, or Sunday. Reject unsupported fields and inappropriate operators with semantic diagnostics.
+
+A missing `WHEN` clause means the condition is always true. Evaluate a missing condition accordingly; do not interpret it as false or as an omitted rule.
+
+The presentation identifies a time range whose start is later than its end as unsupported in version 1. Reject it with a clear diagnostic; do not silently reinterpret it as an overnight range. Equal start and end values represent one inclusive minute.
+
+Implement Boolean expressions correctly. Do not simplify expressions across OR branches using identities that are valid only for AND. All evaluation and optimization must use the same typed condition semantics.
+
+## 5. Lexical analysis
+
+Implement a real lexer that reads raw source text and emits typed tokens.
+
+Each token should include, as appropriate:
+- Token type.
+- Lexeme or normalized value.
+- Line number.
+- Column number.
+- Source position.
+
+Recognize keywords, identifiers, integer priorities, time literals, comparison operators, punctuation, and grouping symbols.
+
+The lexer must:
+- Distinguish reserved keywords from identifiers.
+- Correctly recognize names such as computer_lab and server_room.
+- Report invalid or unexpected characters.
+- Handle whitespace and multiple lines.
+- Track positions for error reporting.
+- Avoid silently discarding malformed input.
+- Avoid confusing numeric priorities with time literals.
+
+The UI must display the actual token stream generated from the current source.
+
+An invalid source program must produce a visible lexical diagnostic. Do not show a successful tokenization status if a lexical error has occurred.
+
+## 6. Syntax analysis and AST construction
+
+Implement a genuine parser that consumes the lexer output and builds an Abstract Syntax Tree.
+
+Use a recursive-descent parser or another clear, maintainable parsing technique. The implementation should be understandable during an academic viva.
+
+Create meaningful AST node types for:
+- A complete policy program.
+- Individual policy rules.
+- ALLOW and DENY effects.
+- Role and resource references.
+- Conditions.
+- Comparisons.
+- Time ranges.
+- Boolean AND and OR expressions.
+- Parenthesized expressions where supported.
+- Priority values.
+
+For example, the AST for:
+
+ALLOW student TO access lab;
+
+should represent a PolicyRule containing:
+- Effect: ALLOW
+- Role: student
+- Resource: lab
+- Condition: none
+- Priority: default priority
+
+The parser must detect missing semicolons, unexpected keywords, incomplete conditions, invalid priorities, unmatched parentheses, and malformed rules.
+
+Diagnostics must identify the approximate or exact source location and provide a practical correction message.
+
+Only generate downstream compiler representations from a syntactically valid AST. Never fabricate an AST when parsing has failed.
+
+Provide both a readable tree view and Graphviz DOT export. If Graphviz is installed, support rendered graph visualization; otherwise, preserve all compiler functionality with a text-tree fallback.
+
+## 7. Semantic analysis and symbol tables
+
+Semantic analysis must validate meaning, not merely grammar.
+
+Load role and resource definitions from JSON and/or CSV configuration files.
+
+The default sample configuration must include at least these roles:
+
+- student
+- faculty
+- guest
+
+It must include at least these resources:
+
+- lab
+- computer_lab
+- server_room
+
+Support additional roles and resources through configuration rather than hardcoding every permitted name into the compiler.
+
+Implement symbol tables or equivalent structured lookup tables for roles, resources, and supported fields/values.
+
+Validate:
+- Every referenced role exists.
+- Every referenced resource exists.
+- Every condition field is supported.
+- Every comparison uses compatible types.
+- Every day value is valid.
+- Every time literal is valid.
+- Every time range is valid.
+- Every priority is a valid, non-negative integer unless the documented grammar explicitly specifies a different range.
+- Every rule contains valid combinations of syntax and symbols.
+
+Examples of semantic errors:
+
+ALLOW unknown_role TO access lab;
+
+Expected: undefined role diagnostic.
+
+ALLOW student TO access unknown_resource;
+
+Expected: undefined resource diagnostic.
+
+ALLOW student TO access lab
+WHEN time BETWEEN 25:00 AND 26:00;
+
+Expected: invalid time diagnostic.
+
+ALLOW student TO access lab
+WHEN time = Monday;
+
+Expected: field/value type mismatch.
+
+Include line and column details wherever available.
+
+Make semantic analysis a separate phase that consumes the AST and symbol/configuration tables. Do not combine all validation logic into the UI or lexer.
+
+A lexical, syntax, or semantic error must prevent the application from treating the source program as a successfully compiled policy set. Policy-analysis conflicts and warnings are not lexical/syntax/semantic errors; they must be reported separately and may be evaluated according to the documented resolver after the source has compiled successfully.
+
+## 8. Policy intermediate representation (IR)
+
+Create a structured and typed intermediate representation for every semantically valid policy.
+
+Each IR rule should contain fields such as:
+- Stable source rule ID.
+- Effect: ALLOW or DENY.
+- Role.
+- Resource.
+- Normalized condition representation.
+- Numeric priority.
+- Source order.
+- Original source text or a source reference.
+- Source location.
+
+Represent conditions as typed objects or an expression tree, not raw condition strings.
+
+Normalize equivalent supported representations where safe. For example:
+
+time BETWEEN 09:00 AND 17:00
+
+may be represented as an inclusive lower and upper time bound.
+
+Generate IR only after successful syntax and semantic checks.
+
+The UI must show:
+1. Source policy.
+2. Structured IR before optimization.
+3. Structured IR after optimization.
+4. A readable summary of changes.
+
+Preserve enough source information to connect diagnostics and optimized rules to the original input.
+
+## 9. Conflict and redundancy analysis
+
+This is one of the project's principal features. Implement real analysis over the IR and condition structures.
+
+Detect and report the following categories. Use the same typed condition evaluator and rule-resolution semantics as the access engine. Do not detect overlap, conflict, or shadowing by comparing raw policy strings alone.
+
+### A. Duplicate policies
+
+Example:
+
+ALLOW student TO access lab;
+
+ALLOW student TO access lab;
+
+Identify equivalent duplicate rules. Report both rule IDs and explain why one is redundant.
+
+Do not identify rules with meaningfully different conditions or priorities as exact duplicates.
+
+### B. Direct conflicts
+
+Example:
+
+ALLOW student TO access lab;
+
+DENY student TO access lab;
+
+Detect contradictory outcomes for the same role and resource when their conditions overlap.
+
+A conflict report must contain:
+- Involved rule IDs.
+- Role and resource.
+- Conflict category.
+- Condition overlap explanation.
+- Priorities.
+- Effective resolution.
+- Recommended corrective action.
+
+### C. Overlapping conditional policies
+
+Example:
+
+ALLOW student TO access computer_lab
+WHEN time BETWEEN 09:00 AND 17:00;
+
+DENY student TO access computer_lab
+WHEN time BETWEEN 12:00 AND 14:00
+PRIORITY 10;
+
+Correctly determine whether both conditions can hold for the same request.
+
+Two different rules with the same role and resource are not automatically conflicting merely because their effects differ. Their applicable conditions must overlap.
+
+Because all supported conditions are Boolean expressions over only `day` and minute-precision `time`, use exact finite-domain predicate evaluation for overlap: evaluate both conditions for each of the seven weekdays and all 1,440 minute values, and report overlap only if a request makes both predicates true. This handles AND, OR, parentheses, equality/inequality, and time comparisons consistently. Return at least one concrete witness request showing the overlap. A lower-priority rule can still participate in an overlap finding, but the report must separately explain which rule wins under the resolution semantics. Cache predicate results or use bit sets if needed for efficiency.
+
+### D. Shadowed and unreachable rules
+
+Detect rules whose presence can never affect the final ALLOW/DENY outcome under the specified rule-resolution semantics. Make the analysis conservative and evidence-based.
+
+Because version 1 has a finite request domain (seven weekdays and 1,440 minute values per day), use exact finite-domain analysis rather than fragile string comparisons or overly simple interval heuristics:
+
+1. For rules with the same role and resource, evaluate their condition predicates over the supported day/time domain to determine whether their conditions overlap.
+2. A condition is impossible/unreachable if it matches no valid day/time request.
+3. To prove that a rule is decision-shadowed or decision-redundant, compare the resolved ALLOW/DENY result with the rule present and with that rule removed for every day/minute request for its role/resource pair. Label it definitely decision-shadowed only if removing it never changes the decision.
+4. If the result changes for at least one request, do not claim that the rule is fully shadowed. Report partial overlap or another less conclusive finding as appropriate.
+5. If removal changes only the explanatory winning rule but never the ALLOW/DENY outcome, describe it as decision-redundant and disclose that the explanation/source attribution may change.
+
+Use the same rule-resolution function and typed condition evaluator as the access engine. An implementation may cache predicate results or use bit sets to avoid repeatedly evaluating the same condition.
+
+### E. Impossible conditions
+
+Reject or diagnose unsupported or impossible conditions, including reversed time ranges that cannot be interpreted under version 1, invalid time values, invalid weekdays, unsupported fields, and type-incompatible comparisons. Distinguish syntax/semantic errors from policy-analysis findings.
+
+### F. Clear reporting
+
+Display all issues in a structured table with:
+- Rule ID.
+- Issue type.
+- Severity.
+- Explanation.
+- Resolution or recommendation.
+
+Distinguish fatal compiler errors from policy-analysis findings. A deterministic conflict may still be evaluated when it has a defined resolution, but it must never be concealed from the user.
+
+## 10. Precise rule-resolution semantics
+
+Implement one shared, deterministic rule-resolution function. The conflict analyzer, shadowing/redundancy analyzer, optimizer verification, and access engine must use this exact function.
+
+For a given access request:
+
+1. Match rules whose role and resource exactly match the request and whose condition evaluates to true. A rule without a `WHEN` clause always matches its condition.
+2. If no rule matches, return `DENY` by default. This is an explicit, documented secure-default implementation decision because the presentation does not specify no-match behavior.
+3. The highest numeric priority among matching rules wins. An omitted `PRIORITY` value defaults to `0`; explicit `PRIORITY 0` is therefore equivalent to the omitted default for rule resolution.
+4. If `ALLOW` and `DENY` rules share the highest priority, `DENY` wins, as specified in the presentation.
+5. If several matching rules have the same winning effect and priority, select the earliest source-order rule as the primary explanatory rule. The UI may show the other matching rules as additional context.
+6. Rule IDs and source order must remain traceable after optimization. Optimized rules may refer back to their original source rule IDs.
+
+Priorities are non-negative integers in the range supported by the implementation; define and validate the concrete range in the README (preferably `0` through `Integer.MAX_VALUE`). Do not allow overflow, parse failures, or negative values to silently become valid priorities.
+
+The engine must explain decisions, including the selected rule, priority, relevant competing rules, and whether default DENY was applied. Do not implement different precedence rules in different modules.
+
+Example explanation:
+
+```text
+Decision: ACCESS DENIED
+Role: student
+Resource: computer_lab
+Day: Monday
+Time: 13:00
+Winning policy: Rule 6
+Reason: The matching DENY policy has a higher priority than the overlapping ALLOW policy.
+```
+
+If no rule matches, explicitly state that default DENY was applied. A policy conflict with deterministic resolution is an analysis finding, not automatically a fatal compiler error. Continue to access evaluation only when lexical, syntax, and semantic compilation succeeded; display unresolved or resolved policy conflicts clearly.
+
+## 11. Optimization passes
+
+Implement actual optimization transformations on the typed IR.
+
+### Pass 1: Exact duplicate elimination
+
+Remove duplicate policies only when they are semantically equivalent, including their effect, role, resource, normalized condition truth set, and effective priority. Since omitted priority defaults to `0`, an omitted priority and explicit `PRIORITY 0` have the same resolution semantics. Keep source mapping and report the eliminated rule and the rule retained.
+
+### Pass 2: Condition simplification
+
+Simplify supported expressions when correctness can be established.
+
+Example:
+
+time > 08:00 AND time > 10:00
+
+can be simplified to:
+
+time > 10:00
+
+Respect inclusive and exclusive bounds, types, parentheses, boolean precedence, and OR branches. Do not use string-based simplification or apply an identity outside its valid logical context.
+
+### Pass 3: Unreachable or redundant policy removal
+
+Remove a policy only when the implementation can prove that removing it preserves every ALLOW/DENY decision across the supported request domain. Consider condition overlap, priorities, source-order behavior, and the equal-priority DENY rule. Do not remove a rule merely because another rule has the same role and resource.
+
+If a rule's condition matches no request, it may be removed as unreachable after reporting the reason. If a rule matches some requests but never changes the final ALLOW/DENY result, it may be removed as decision-redundant. Preserve source mapping and explain that the primary displayed winning rule may change after redundant-rule removal.
+
+### Optimization audit
+
+For every pass, record:
+- Pass name.
+- Number of rules before and after.
+- Transformations performed.
+- Removed rules and reasons.
+- Simplified conditions.
+- Warnings or skipped unsafe transformations.
+
+Show the original and optimized policy sets side by side.
+
+### Mandatory optimization correctness gate
+
+Verify every optimization pass separately. For each pass, compare decisions before and after that pass. If equivalence fails, revert that pass, preserve the last verified policy set, report the counterexample, and do not mark the failed transformation as applied. A later pass must never hide an earlier failed transformation.
+
+Version 1 has a finite input domain for conditions: seven weekdays and 1,440 minute values per day. Implement exhaustive decision-equivalence checking for every role/resource pair referenced by any rule in either the original or optimized policy set, for every weekday, and for every minute from `00:00` through `23:59`. Use the same resolver for both versions.
+
+Pairs that are not referenced by a rule in either policy set always produce default DENY in both versions, so they do not need separate enumeration. For each referenced role/resource pair, the checker must compare the actual ALLOW/DENY outcome at all 10,080 day/time combinations. This is an exact check for the documented version 1 condition language, not a sample-based estimate.
+
+If an equivalence check fails:
+- Identify a counterexample request (role, resource, day, and time).
+- Display the original and transformed decisions.
+- Display the relevant source rules when available.
+- Mark the optimization pass as failed and revert it.
+- Never label the failed or unverified output as a verified optimized policy set.
+
+Show the original and final verified policy sets side by side, including the pass-by-pass audit log. Run the exhaustive checks on a background task so the JavaFX interface remains responsive. Show progress where practical, and handle cancellation or runtime failures without claiming verification succeeded.
+
+## 12. Access decision engine
+
+Implement a functional access-testing module using the compiled and optimized policies.
+
+The tester must accept:
+- Role.
+- Resource.
+- Day.
+- Time.
+
+Populate role and resource choices from configuration. Validate user input before evaluation. Use the same language and condition semantics as the compiler.
+
+Show:
+- ACCESS GRANTED or ACCESS DENIED.
+- Winning rule ID, when applicable.
+- Winning source policy.
+- Priority.
+- Matching rule information.
+- A human-readable decision explanation.
+- Conflict-resolution reasoning when relevant.
+- Default-deny reasoning when no rule matches.
+
+Support repeated requests with different roles, resources, days, and times.
+
+The results must change according to the actual inputs and compiled rules. The interface must never use hardcoded success messages or preselected rule outcomes to imitate working access control. Clearly indicate whether a request is being evaluated against the original compiled IR or the last equivalence-verified optimized IR. If optimization verification fails, do not evaluate the unverified transformed set by default.
+
+This is a local policy-evaluation engine, not a real login or authentication system. Clearly label it accordingly.
+
+## 13. High-quality desktop user interface
+
+Build a professional, attractive JavaFX application with a strong visual hierarchy and a consistent design system.
+
+The appearance should feel like a polished developer/security-analysis tool, not a basic college form.
+
+Use:
+- A restrained navy/blue foundation with teal and green accents.
+- Readable typography and consistent spacing.
+- A clean dashboard with strong section hierarchy.
+- Clear status indicators for errors, warnings, conflicts, and successful validation.
+- Well-designed tables, cards, forms, empty states, and result panels.
+- Consistent buttons, focus states, and field validation.
+- Responsive layouts within the desktop window.
+- Appropriate light/dark styling only if it can be implemented without destabilizing the application.
+
+Avoid excessive gradients, unnecessary animations, clutter, decorative charts with fake data, or oversized panels that reduce useful workspace.
+
+### Required application sections
+
+**1. Dashboard**
+
+Show the project name, a short description, recent compilation status, number of rules, detected issues, optimization status, and an action to open the policy editor.
+
+Statistics must be derived from actual application state. Never invent performance figures or display fabricated successful results.
+
+**2. Policy editor**
+
+Provide a source editor with:
+- Syntax highlighting for PolicyScript keywords and literals.
+- Line numbers where practical.
+- Load, save, reset, and sample-policy actions.
+- Compile and analyze actions.
+- Visible syntax/semantic diagnostics.
+
+Do not depend on syntax highlighting as the parsing mechanism. The actual lexer and parser must process the underlying source.
+
+**3. Compiler pipeline**
+
+Display the required stages in order:
+
+Lexer → Parser and AST → Semantic Analyzer → Policy IR → Conflict Analyzer → Optimizer → Access Engine.
+
+For every stage, show the actual execution status and relevant output. Let users inspect tokens, AST, symbols, semantic diagnostics, IR, conflicts, and optimization logs.
+
+Do not mark a phase as successful merely because the user clicked Compile. Its status must reflect the actual result.
+
+**4. AST explorer**
+
+Show the hierarchical tree and readable node details. Support Graphviz visualization where available. Keep a usable fallback if Graphviz is not installed.
+
+**5. Semantic analysis and symbol table**
+
+Show the configured roles, resources, supported fields, validation results, and useful error details.
+
+**6. Conflict and redundancy explorer**
+
+Provide filters by issue type and severity. Selecting an issue should reveal the involved rules and explain the detected condition overlap or precedence outcome.
+
+**7. IR and optimization workspace**
+
+Show pre-optimization and post-optimization representations, an optimization summary, removed rules, transformed conditions, and equivalence-check status.
+
+**8. Access tester**
+
+Provide controls for role, resource, day, and time. Include example requests and a clear, explainable result panel.
+
+**9. Configuration management**
+
+Allow the user to load validated role/resource configuration files. Explain configuration errors rather than silently replacing invalid data with hardcoded defaults.
+
+### UI correctness
+
+The interface must be connected to actual compiler services. Create a clean service layer between JavaFX controls and compiler modules. When policy source or role/resource configuration changes, invalidate any compiled result that is no longer based on the current inputs. Do not let the access tester unknowingly evaluate stale IR or a failed optimization output.
+
+Use JavaFX background tasks for potentially long operations, prevent unsafe cross-thread UI updates, and keep the interface responsive during compilation or equivalence checking.
+
+Provide meaningful error handling for invalid source files, missing configuration, inaccessible paths, Graphviz unavailability, and unexpected runtime failures.
+
+## 14. Sample data and reproducible demonstration
+
+Ship the project with valid sample configurations and policy programs.
+
+Include a demonstration policy file containing examples for student, faculty, and guest roles, including both ALLOW and DENY rules, time restrictions, day restrictions, priorities, and at least one policy conflict.
+
+Include separate sample files for:
+- A completely valid policy set.
+- Duplicate rules.
+- A direct ALLOW/DENY conflict.
+- Overlapping time conditions.
+- An unknown role.
+- An unknown resource.
+- Invalid time values.
+- Malformed syntax.
+- A provably unreachable policy.
+- An optimization example.
+
+Keep invalid samples separate from the valid demonstration program so that users can run successful demonstrations immediately.
+
+Include a sample test scenario:
+
+Role: student
+
+Resource: computer_lab
+
+Day: Monday
+
+Time: 14:00
+
+With a policy allowing student access to computer_lab from 09:00 through 17:00, the expected result is ACCESS GRANTED unless another matching rule takes precedence.
+
+At 18:00, that time-restricted rule must not match.
+
+Create additional scenarios that demonstrate a higher-priority DENY rule, equal-priority DENY precedence, a non-overlapping rule, and default DENY.
+
+These must be executable examples backed by the real engine.
+
+## 15. Automated testing and correctness requirements
+
+Use JUnit 5 and create a meaningful test suite covering all compiler phases. Aim for at least 30 substantive test cases, expanding the suite as necessary.
+
+### Lexer tests
+- Every supported keyword.
+- Identifiers with underscores.
+- Time literals.
+- Priority literals.
+- Operators and punctuation.
+- Whitespace and multiline input.
+- Invalid characters.
+- Correct source positions.
+
+### Parser tests
+- Single valid rule.
+- Multiple rules.
+- Optional conditions.
+- Optional priority.
+- Boolean AND/OR precedence.
+- Parenthesized expressions.
+- Malformed rules.
+- Missing semicolons.
+- Incomplete BETWEEN expressions.
+
+### Semantic tests
+- Valid configured roles and resources.
+- Unknown role.
+- Unknown resource.
+- Invalid time values.
+- Invalid weekday.
+- Unsupported field.
+- Type mismatch.
+- Invalid priority.
+- Unsupported reversed time range.
+
+### Conflict-analysis tests
+- Exact duplicate detection.
+- Contradictory identical-scope policies.
+- Overlapping time intervals.
+- Disjoint time intervals.
+- Disjoint weekdays.
+- Higher-priority resolution.
+- Equal-priority DENY precedence.
+- Fully shadowed rule.
+- Partial overlap that must not be called complete shadowing.
+
+### Optimizer tests
+- Exact duplicate removal.
+- Correct interval simplification.
+- Removal of a provably unreachable rule.
+- Retention of rules with different priorities when necessary.
+- Preservation of disjoint conditions.
+- Preservation of decisions after optimization.
+- A deliberately faulty transformation must be detected by the equivalence gate if the checker is exercised against different outputs.
+
+### Access-engine tests
+- Valid ALLOW request.
+- Valid DENY request.
+- In-range and out-of-range times.
+- Correct weekday evaluation.
+- Highest-priority rule wins.
+- Equal-priority DENY wins.
+- No matching rule produces default DENY.
+- The explanation identifies the effective winning rule.
+
+### Integration tests
+
+At least one end-to-end test must process source text through:
+
+Lexer → Parser → AST → Semantic Analysis → IR → Conflict Analysis → Optimization → Equivalence Check → Access Evaluation.
+
+Include regression tests based on the examples in the supplied presentation.
+
+Run the complete test suite and fix all failures. Do not report tests as passing unless they have actually been executed and passed.
+
+If a build or test cannot be run because of a missing tool or environment limitation, state the exact limitation honestly.
+
+## 16. Diagnostics, reliability, and error handling
+
+Build a central diagnostic model containing severity, error code, message, source location, phase, and relevant rule ID when applicable.
+
+Provide actionable messages. For example:
+
+Error [SEM-UNKNOWN-ROLE]: Role 'unknown_role' is not defined in the active configuration. Check the role configuration or correct the policy identifier.
+
+Error [SEM-INVALID-TIME]: '25:00' is not a valid 24-hour time value.
+
+Error [SYN-MISSING-SEMICOLON]: Expected ';' at the end of the policy rule.
+
+Warnings and analysis findings must not be mistaken for fatal syntax or semantic errors.
+
+Do not swallow exceptions, silently skip invalid rules, return success for failed compilation, or leave controls permanently disabled after an error.
+
+Compilation must produce a well-defined result object containing diagnostics, phase outputs, and success/failure information. The result object must distinguish compilation success, analysis findings, optimization verification status, and access-evaluation status instead of collapsing them into one Boolean flag.
+
+Invalid source must not be partially executed as though it were a valid compiled policy set.
+
+## 17. Documentation and recruiter readiness
+
+Create a complete README containing:
+
+1. Project title and description.
+2. Problem statement and objectives.
+3. Features and supported language constructs.
+4. Compiler pipeline and phase responsibilities.
+5. Architecture diagram.
+6. Technology stack.
+7. Project directory structure.
+8. Requirements and installation.
+9. Exact build and run commands.
+10. Test execution commands.
+11. PolicyScript grammar and example programs.
+12. Role/resource configuration format.
+13. Conflict-resolution rules.
+14. Intermediate representation explanation.
+15. Optimization passes and the equivalence-check method.
+16. Example access tests with expected and actual results.
+17. Known limitations and version 1 scope.
+18. Troubleshooting guide.
+19. Future enhancements.
+
+Include a concise technical project summary suitable for a GitHub repository and an ATS-friendly resume entry that accurately describes the implemented features. Do not fabricate benchmark scores, performance improvements, security certifications, or test results.
+
+Keep the presentation terminology recognizable so the implementation can be demonstrated and explained during the Compiler Design evaluation.
+
+## 18. Definition of complete implementation
+
+The project is complete only when all of the following are satisfied:
+
+- The application can be built and launched from the documented instructions.
+- Users can load or enter PolicyScript source and compile it.
+- The lexer, parser, AST, semantic analyzer, IR generator, conflict analyzer, optimizer, and access engine are real implemented modules.
+- Each displayed phase result is generated from the current input.
+- Invalid policies produce meaningful diagnostics.
+- Configured student, faculty, guest, and additional roles are handled through configuration.
+- Conflict detection respects overlapping conditions and rule precedence.
+- Optimization applies only transformations that preserve decisions.
+- The equivalence checker identifies decision changes rather than allowing unsafe optimization to pass.
+- The access engine returns correct, deterministic decisions with explanations.
+- The UI responds to real user input and remains usable during longer operations.
+- The application includes executable sample policies and reproducible demonstrations.
+- JUnit tests have been run, and any failures have been fixed or explicitly disclosed.
+- Documentation accurately reflects the actual implementation.
+- There are no buttons that merely pretend to work, hardcoded outputs presented as dynamic results, or major placeholder implementations.
+
+## 19. Development and delivery instructions
+
+Work in a disciplined implementation sequence:
+
+Phase 1: Inspect the current project, establish the architecture, and define the language and decision semantics.
+
+Phase 2: Implement lexer, parser, AST, diagnostics, and automated tests.
+
+Phase 3: Implement configuration loading, symbol tables, and semantic validation.
+
+Phase 4: Implement normalized IR, conflict analysis, and accurate overlap/shadowing checks.
+
+Phase 5: Implement optimization passes and the decision-equivalence verification gate.
+
+Phase 6: Implement the access engine and test it against the supplied presentation examples.
+
+Phase 7: Build the polished JavaFX application and connect every screen to the real compiler services.
+
+Phase 8: Add sample files, integration tests, documentation, and run instructions.
+
+Phase 9: Run the complete build and test suite, resolve defects, and conduct a final correctness review.
+
+Do not stop after creating the interface or completing only the first compiler phase. Continue through integration and verification.
+
+If an implementation detail is not explicitly settled in the presentation, choose a simple, deterministic, documented solution that is consistent with the supported language. Do not silently introduce complex features outside the version 1 scope.
+
+After implementation, provide:
+- A summary of what was implemented.
+- The complete project file structure.
+- The exact command to build the application.
+- The exact command to launch it.
+- The exact command to run the tests.
+- The test results that were actually observed.
+- A walkthrough of a successful compilation.
+- A walkthrough of a detected conflict.
+- A walkthrough of a safe optimization.
+- A walkthrough of the access decision engine.
+- Any remaining limitations that have not been resolved.
+
+**Final priority:** compiler correctness first, integration second, usability and visual quality third, and documentation and presentation readiness throughout. The result must be a genuinely functioning PolicyScript Compiler Design project—not merely a demonstration that looks functional.

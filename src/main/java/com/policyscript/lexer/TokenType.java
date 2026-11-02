@@ -1,0 +1,9 @@
+package com.policyscript.lexer;
+
+public enum TokenType {
+    ALLOW, DENY, TO, ACCESS, WHEN, BETWEEN, AND, OR, PRIORITY,
+    TIME_FIELD, DAY_FIELD,
+    IDENTIFIER, TIME_LITERAL, INTEGER,
+    EQ, NE, LT, LE, GT, GE,
+    SEMICOLON, LPAREN, RPAREN, INVALID, EOF
+}
